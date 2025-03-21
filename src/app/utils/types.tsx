@@ -42,7 +42,7 @@ export interface Product {
   export type CartItem = {
     id: number;
     title: string;
-    image: { asset: { url: string } };  // Matching structure with Product type
+    image?: { asset: { _ref: string } } | string; // Allowing for both object and string types
     slug: string;
     price: number;
     category: string;

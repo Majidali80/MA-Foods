@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@sanity/client";
 import { FaDownload, FaHome } from "react-icons/fa";
@@ -34,10 +34,8 @@ interface OrderData {
   items: {
     _key: string;
     product: {
-      _type: string;
-      _ref: string;
+      title: string; // Updated to include title instead of just _ref
     };
-    title:string;
     quantity: number;
     price: number;
   }[];
@@ -51,7 +49,7 @@ interface OrderData {
   donation?: number;
 }
 
-export default function OrderConfirmation() {
+const OrderConfirmationContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [orderDetails, setOrderDetails] = useState<OrderData | null>(null);
@@ -60,10 +58,42 @@ export default function OrderConfirmation() {
   useEffect(() => {
     const orderNumber = searchParams.get("orderNumber");
     if (orderNumber) {
-      // Fetch order details from Sanity
+      // Fetch order details from Sanity with product title
       sanityClient
         .fetch(
-          `*[_type == "order" && orderNumber == $orderNumber][0]`,
+          `*[_type == "order" && orderNumber == $orderNumber][0] {
+            _id,
+            orderNumber,
+            customer {
+              firstName,
+              lastName,
+              email,
+              phone,
+              address {
+                street1,
+                street2,
+                city,
+                country
+              },
+              subscribe
+            },
+            items[] {
+              _key,
+              "product": product->{
+                title
+              },
+              quantity,
+              price
+            },
+            paymentMethod,
+            subtotal,
+            shipping,
+            discount,
+            total,
+            orderDate,
+            notes,
+            donation
+          }`,
           { orderNumber }
         )
         .then((data) => {
@@ -101,9 +131,7 @@ export default function OrderConfirmation() {
     doc.text("Items:", 20, 100);
     orderDetails.items.forEach((item, index) => {
       doc.text(
-        `${index + 1}. Product ID: ${item.product._ref}, Quantity: ${item.quantity}, Price: Rs. ${item.price.toFixed(
-          2
-        )}`,
+        `${index + 1}. Product: ${item.product.title}, Quantity: ${item.quantity}, Price: Rs. ${item.price.toFixed(2)}`,
         30,
         110 + index * 10
       );
@@ -196,7 +224,7 @@ export default function OrderConfirmation() {
               <ul className="list-disc pl-5">
                 {orderDetails.items.map((item, index) => (
                   <li key={index}>
-                    Product Detail: {item.product._ref}, Quantity: {item.quantity}, Price: Rs. {item.price.toFixed(2)}
+                    Product: {item.product.title}, Quantity: {item.quantity}, Price: Rs. {item.price.toFixed(2)}
                   </li>
                 ))}
               </ul>
@@ -239,5 +267,13 @@ export default function OrderConfirmation() {
         </div>
       </div>
     </div>
+  );
+};
+
+export default function OrderConfirmation() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <OrderConfirmationContent />
+    </Suspense>
   );
 }

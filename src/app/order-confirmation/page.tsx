@@ -37,6 +37,7 @@ interface OrderData {
       _type: string;
       _ref: string;
     };
+    title:string;
     quantity: number;
     price: number;
   }[];
@@ -195,7 +196,7 @@ export default function OrderConfirmation() {
               <ul className="list-disc pl-5">
                 {orderDetails.items.map((item, index) => (
                   <li key={index}>
-                    Product ID: {item.product._ref}, Quantity: {item.quantity}, Price: Rs. {item.price.toFixed(2)}
+                    Product Detail: {item.product._ref}, Quantity: {item.quantity}, Price: Rs. {item.price.toFixed(2)}
                   </li>
                 ))}
               </ul>

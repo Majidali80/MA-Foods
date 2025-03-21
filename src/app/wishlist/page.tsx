@@ -58,7 +58,20 @@ export default function Wishlist() {
   };
 
   const handleAddToCart = (product: Product) => {
-    addToCart(product);
+    // Transform Product to match cartContext's Product
+    const cartProduct = {
+      _id: product._id,
+      title: product.productName,
+      price: product.price,
+      image: typeof product.image === 'string' ? product.image : product.image?.asset?.url || "/path/to/placeholder-image.png", // Use the resolved URL from Sanity
+      discountPercentage: product.discountPercentage,
+      productImage: {
+        asset: {
+          url: typeof product.image === 'string' ? product.image : product.image?.asset?.url || "/path/to/placeholder-image.png", // Match cartContext expectation
+        },
+      },
+    };
+    addToCart(cartProduct);
     setNotification("Item added to Cart");
     setNotificationType("cart");
     setTimeout(() => setNotification(null), 3000);

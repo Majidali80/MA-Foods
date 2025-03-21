@@ -1,20 +1,25 @@
 "use client";
+
 import React from "react";
 import Head from "next/head";
 import { useRouter } from "next/navigation";
 import { useCart } from "../context/cartContext";
 import Swal from "sweetalert2";
-import { urlFor } from "../../sanity/lib/client";
 import Image from "next/image";
 import { FaTruck, FaShareAlt, FaTrash, FaShoppingBag, FaGift } from "react-icons/fa";
 
+// Align with cartContext's CartItem type
 interface CartItem {
   _id: string;
   title: string;
   price: number;
   quantity: number;
   discountPercentage: number;
-  image?: { asset: { _ref: string } };
+  productImage: {
+    asset: {
+      url: string;
+    };
+  };
 }
 
 export default function Cart() {
@@ -48,7 +53,7 @@ export default function Cart() {
       text: "Ready to complete your purchase?",
       icon: "question",
       showCancelButton: true,
-      confirmButtonColor: "#FBBF24", // Amber-400
+      confirmButtonColor: "#FBBF24",
       cancelButtonColor: "#EF4444",
       confirmButtonText: "Yes, Checkout!",
     }).then((result) => {
@@ -111,7 +116,6 @@ export default function Cart() {
           </div>
         ) : (
           <div className="flex flex-col gap-6">
-            {/* Order Summary Section */}
             <div className="bg-white p-4 sm:p-6 rounded-xl shadow-lg border border-navy-100">
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6">
                 <h2 className="text-xl sm:text-2xl font-Montserrat font-semibold text-navy-900 mb-4 sm:mb-0">
@@ -133,9 +137,9 @@ export default function Cart() {
                       className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-navy-200 pb-4 mb-4 gap-4"
                     >
                       <div className="flex items-center space-x-4">
-                        {item.image?.asset?._ref ? (
+                        {item.image ? (
                           <Image
-                            src={urlFor(item.image).url()}
+                            src={item.image}
                             alt={item.title}
                             width={80}
                             height={80}
@@ -197,7 +201,6 @@ export default function Cart() {
                 })}
               </div>
 
-              {/* Surprise Gift Section */}
               <div className="mt-6 p-4 border border-navy-200 rounded-lg bg-navy-50">
                 <h3 className="text-lg sm:text-xl font-Montserrat font-semibold text-navy-900 mb-4 flex items-center gap-2">
                   <FaGift className="text-amber-400" /> Free Surprise Gift!
@@ -229,7 +232,6 @@ export default function Cart() {
                 )}
               </div>
 
-              {/* Cart Summary */}
               <div className="mt-6 p-4 border border-navy-200 rounded-lg bg-navy-50">
                 <h3 className="text-lg sm:text-xl font-Montserrat font-semibold text-navy-900 mb-4">
                   Cart Summary
@@ -259,7 +261,6 @@ export default function Cart() {
                 </div>
               </div>
 
-              {/* Action Buttons */}
               <div className="mt-6 flex flex-col sm:flex-row gap-4">
                 <button
                   onClick={handleCheckout}
@@ -275,7 +276,6 @@ export default function Cart() {
                 </button>
               </div>
 
-              {/* Social Media Sharing */}
               <div className="mt-6 flex justify-center">
                 <button
                   onClick={shareCart}

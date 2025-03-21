@@ -5,12 +5,12 @@ import Link from "next/link";
 import Image from "next/image";
 import { client, urlFor } from "../../../sanity/lib/client";
 import { allProductsQuery } from "../../../sanity/lib/queries";
-import { Product } from "../../../app/utils/types";
 import { FaRegHeart, FaHeart, FaShoppingCart } from "react-icons/fa";
 import { useCart } from "../../../app/context/cartContext";
+import { Product as ProductType } from "../../../app/utils/types";
 
 export default function BestSelling() {
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<ProductType[]>([]);
   const [wishlist, setWishlist] = useState<Set<string>>(() => {
     if (typeof window !== "undefined") {
       const storedWishlist = localStorage.getItem("wishlist");
@@ -18,7 +18,7 @@ export default function BestSelling() {
     }
     return new Set<string>();
   });
-  const [wishlistCount, setWishlistCount] = useState(0); // State for wishlist count
+  const [wishlistCount, setWishlistCount] = useState(0);
   const [notification, setNotification] = useState<string | null>(null);
   const [notificationType, setNotificationType] = useState<string>("");
 
@@ -27,27 +27,27 @@ export default function BestSelling() {
 
   useEffect(() => {
     async function fetchProduct() {
-      const fetchedProduct: Product[] = await client.fetch(allProductsQuery);
-      setProducts(fetchedProduct);
+      const fetchedProducts: ProductType[] = await client.fetch(allProductsQuery);
+      setProducts(fetchedProducts);
     }
     fetchProduct();
   }, []);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      localStorage.setItem("wishlist", JSON.stringify([...wishlist]));
-      // Dispatch a custom event to notify other components (e.g., Navbar) of the wishlist update
+      localStorage.setItem("wishlist", JSON.stringify(Array.from(wishlist)));
       window.dispatchEvent(new Event("wishlistUpdated"));
     }
   }, [wishlist]);
 
-  // Fetch wishlist count for the badge
   useEffect(() => {
     const updateWishlistCount = () => {
       if (typeof window !== "undefined") {
         const storedWishlist = localStorage.getItem("wishlist");
-        const wishlist = storedWishlist ? new Set<string>(JSON.parse(storedWishlist)) : new Set<string>();
-        setWishlistCount(wishlist.size);
+        const wishlistSet = storedWishlist
+          ? new Set<string>(JSON.parse(storedWishlist))
+          : new Set<string>();
+        setWishlistCount(wishlistSet.size);
       }
     };
 
@@ -78,8 +78,17 @@ export default function BestSelling() {
     setTimeout(() => setNotification(null), 3000);
   };
 
-  const handleAddToCart = (product: Product) => {
-    addToCart(product);
+  const handleAddToCart = (product: ProductType) => {
+    const imageUrl = product.image.asset.url || "/path/to/placeholder-image.png";
+    const cartProduct = {
+      _id: product._id,
+      title: product.title,
+      price: product.price,
+      image: imageUrl, // Use resolved URL for cartContext
+      discountPercentage: product.discountPercentage,
+      productImage: { asset: { url: imageUrl } }, // Match cartContext expectation
+    };
+    addToCart(cartProduct);
     setNotification("Item added to Cart");
     setNotificationType("cart");
     setTimeout(() => setNotification(null), 3000);
@@ -103,7 +112,6 @@ export default function BestSelling() {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {products.map((product) => {
             const discountedPrice = getDiscountedPrice(product.price, product.discountPercentage);
-
             return (
               <div
                 key={product._id}
@@ -113,10 +121,10 @@ export default function BestSelling() {
                   <h2 className="text-base sm:text-lg font-Montserrat font-bold text-navy-900 mb-2">
                     {product.productName}
                   </h2>
-                  {product.image ? (
+                  {product.image?.asset?.url ? (
                     <div className="relative">
                       <Image
-                        src={urlFor(product.image).url() || '/path/to/placeholder-image.png'}
+                        src={product.image.asset.url}
                         alt={product.title}
                         width={300}
                         height={250}
@@ -165,9 +173,7 @@ export default function BestSelling() {
           })}
         </div>
 
-        {/* Wishlist and Cart Icons */}
         <div className="fixed bottom-6 right-6 flex space-x-4">
-          {/* Wishlist Icon */}
           <Link href="/wishlist" className="relative">
             <button className="bg-amber-400 text-navy-900 rounded-full p-4 shadow-lg hover:bg-amber-500 transition-colors">
               <FaHeart size={24} />
@@ -179,7 +185,6 @@ export default function BestSelling() {
             </button>
           </Link>
 
-          {/* Cart Icon */}
           <Link href="/cart" className="relative">
             <button className="bg-amber-400 text-navy-900 rounded-full p-4 shadow-lg hover:bg-navy-800 transition-colors">
               <FaShoppingCart size={24} />
@@ -192,7 +197,6 @@ export default function BestSelling() {
           </Link>
         </div>
 
-        {/* Notification */}
         {notification && (
           <div
             className={`fixed bottom-4 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-md text-white ${

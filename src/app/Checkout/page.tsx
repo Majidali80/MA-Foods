@@ -182,7 +182,7 @@ export default function CheckoutPage() {
             ? ", " + orderData.customer.address.street2
             : ""
         }, ${orderData.customer.address.city}, ${orderData.customer.address.country}</p>
-        <p>We’ll notify you once your order ships. Happy eating!</p>
+        <p>We'll notify you once your order ships. Happy eating!</p>
         <p style="color: #FBBF24;">— MA Foods Team</p>
       `,
     };
@@ -194,11 +194,11 @@ export default function CheckoutPage() {
   //     console.error("Email failed:", error);
   //     Swal.fire(
   //       "Warning",
-  //       "Order placed, but email confirmation failed. We’ll still process your order!",
+  //       "Order placed, but email confirmation failed. We'll still process your order!",
   //       "warning"
   //     );
   //   }
-  // };
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -15,6 +15,7 @@ interface CartItem {
   price: number;
   quantity: number;
   discountPercentage: number;
+  image: string; // Added to match cartContext
   productImage: {
     asset: {
       url: string;
@@ -137,9 +138,9 @@ export default function Cart() {
                       className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-navy-200 pb-4 mb-4 gap-4"
                     >
                       <div className="flex items-center space-x-4">
-                        {item.image ? (
+                        {item.productImage?.asset?.url ? (
                           <Image
-                            src={item.image}
+                            src={item.productImage.asset.url}
                             alt={item.title}
                             width={80}
                             height={80}

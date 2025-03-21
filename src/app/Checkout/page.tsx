@@ -13,16 +13,10 @@ import { urlFor } from "../../sanity/lib/client";
 const sanityClient = createClient({
   projectId: "p72g6oqi",
   dataset: "production",
-  apiVersion: "2025-03-20", // Updated to current date
+  apiVersion: "2025-03-20", // Matches your current date
   useCdn: false,
   token: process.env.NEXT_PUBLIC_SANITY_TOKEN,
 });
-
-// // SendGrid setup (server-side only)
-// if (typeof window === "undefined") {
-//   const sgMail = require("@sendgrid/mail");
-//   sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-// }
 
 interface CartItem {
   _id: string;
@@ -30,7 +24,7 @@ interface CartItem {
   price: number;
   quantity: number;
   discountPercentage: number;
-  image?: { asset: { _ref: string } };
+  image?: { asset: { _ref: string } } | string;
 }
 
 interface OrderData {
@@ -147,7 +141,7 @@ export default function CheckoutPage() {
   const sendOrderConfirmationEmail = async (orderData: OrderData) => {
     const msg = {
       to: orderData.customer.email,
-      from: "orders@mafoods.com", // Replace with your verified sender
+      from: "orders@mafoods.com",
       subject: `Order Confirmation - ${orderData.orderNumber}`,
       html: `
         <h1 style="color: #11142D;">Thank You for Your Order!</h1>
@@ -186,18 +180,7 @@ export default function CheckoutPage() {
         <p style="color: #FBBF24;">— MA Foods Team</p>
       `,
     };
-
-  //   try {
-  //     await sgMail.send(msg);
-  //     console.log("Email sent to:", orderData.customer.email);
-  //   } catch (error) {
-  //     console.error("Email failed:", error);
-  //     Swal.fire(
-  //       "Warning",
-  //       "Order placed, but email confirmation failed. We'll still process your order!",
-  //       "warning"
-  //     );
-  //   }
+    // Email sending is commented out as per your original code
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -484,14 +467,24 @@ export default function CheckoutPage() {
                     className="flex items-center justify-between gap-4 border-b border-navy-200 pb-4"
                   >
                     <div className="flex items-center gap-4">
-                      {item.image?.asset?._ref ? (
-                        <Image
-                          src={urlFor(item.image).url()}
-                          alt={item.title}
-                          width={48}
-                          height={48}
-                          className="w-12 h-12 object-cover rounded-lg border border-navy-200"
-                        />
+                      {item.image ? (
+                        typeof item.image === "string" ? (
+                          <Image
+                            src={item.image}
+                            alt={item.title}
+                            width={48}
+                            height={48}
+                            className="w-12 h-12 object-cover rounded-lg border border-navy-200"
+                          />
+                        ) : (
+                          <Image
+                            src={urlFor(item.image).url()}
+                            alt={item.title}
+                            width={48}
+                            height={48}
+                            className="w-12 h-12 object-cover rounded-lg border border-navy-200"
+                          />
+                        )
                       ) : (
                         <div className="w-12 h-12 bg-navy-100 rounded-lg flex items-center justify-center text-navy-500 text-sm">
                           No Image

@@ -187,18 +187,18 @@ export default function CheckoutPage() {
       `,
     };
 
-    try {
-      await sgMail.send(msg);
-      console.log("Email sent to:", orderData.customer.email);
-    } catch (error) {
-      console.error("Email failed:", error);
-      Swal.fire(
-        "Warning",
-        "Order placed, but email confirmation failed. We’ll still process your order!",
-        "warning"
-      );
-    }
-  };
+  //   try {
+  //     await sgMail.send(msg);
+  //     console.log("Email sent to:", orderData.customer.email);
+  //   } catch (error) {
+  //     console.error("Email failed:", error);
+  //     Swal.fire(
+  //       "Warning",
+  //       "Order placed, but email confirmation failed. We’ll still process your order!",
+  //       "warning"
+  //     );
+  //   }
+  // };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
